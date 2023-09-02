@@ -98,6 +98,7 @@
     "jest-skipped-reporter": "0.0.5",
     "jshint": "2.13.6",
     "madge": "6.1.0",
+    "punycode": "1.4.1",
     "raf": "3.4.1",
     "react-addons-test-utils": "15.6.2",
     "react-test-renderer": "18.2.0",

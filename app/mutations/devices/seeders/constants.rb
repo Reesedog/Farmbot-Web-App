@@ -5,7 +5,7 @@ module Devices
       DIGITAL = CeleryScriptSettingsBag::DIGITAL
 
       module Names
-        EXPRESS = "FarmBot Express"
+        EXPRESS = "ER"
         EXPRESS_XL = "FarmBot Express XL"
         GENESIS = "FarmBot Genesis"
         GENESIS_XL = "FarmBot Genesis XL"

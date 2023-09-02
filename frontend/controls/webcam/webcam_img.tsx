@@ -20,11 +20,12 @@ export class WebcamImg
       style: this.state.isLoaded ? {} : { display: "none" },
     };
     return <div className={"webcam-stream-valid"}>
-      {!this.state.isLoaded &&
-        <PlaceholderImg textOverlay={t("Loading...")} />}
       {splitSrc[0] == "iframe"
         ? <iframe src={splitSrc[1]} {...common} />
-        : <img src={this.props.src} {...common} />}
+        : <video width="100%" height="100%" controls muted>
+          <source src={this.props.src} type="video/mp4" />
+        </video>
+      }
     </div>;
   };
 

@@ -122,6 +122,7 @@ export class TourStepContainer
         </h4>
         <div className={"toast-message"}>
           <div className={"message-contents"} style={{
+           
             height: getMessageHeight(),
             opacity: getOpacity(),
           }}>
@@ -166,13 +167,13 @@ const TourStepNavigation = (props: TourStepNavigationProps) => {
   const prevStepSlug = getAdjacentTourStepSlug(-1);
   const nextStepSlug = getAdjacentTourStepSlug(1);
   return <div className={"toast-loader"}>
-    <i className={`fa fa-backward previous ${prevStepSlug ? "" : "disabled"}`}
+    <i className={`fa fa-backward fa-lg previous ${prevStepSlug ? "" : "disabled"}`}
       title={t("back")}
       onClick={() => updateTourState(urlTourSlug, prevStepSlug)} />
-    <i className={`fa fa-forward next ${nextStepSlug ? "" : "disabled"}`}
+    <i className={`fa fa-forward fa-lg next ${nextStepSlug ? "" : "disabled"}`}
       title={t("advance")}
       onClick={() => updateTourState(urlTourSlug, nextStepSlug)} />
-    <i className={"fa fa-times exit"}
+    <i className={"fa fa-times exit fa-lg"}
       title={t("quit")}
       onClick={() => updateTourState(undefined, undefined)} />
   </div>;

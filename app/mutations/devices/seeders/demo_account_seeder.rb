@@ -4,9 +4,9 @@ module Devices
       BASE_URL = "/app-resources/img/demo_accounts/"
       FEEDS = {
         "Express XL" => "Express_XL_Demo_Webcam.JPG",
-        "Express" => "Express_Demo_Webcam.JPG",
+        "ER" => "ER.mp4",
         "Genesis XL" => "Genesis_XL_Demo_Webcam.jpg",
-        "Genesis" => "Genesis_Demo_Webcam.jpg",
+        "Genesis" => "ER.mp4",
       }
       UNUSED_ALERTS = ["api.seed_data.missing", "api.user.not_welcomed"]
 
