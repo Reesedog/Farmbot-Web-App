@@ -10,7 +10,7 @@ import { CameraCalibration } from "./camera_calibration";
 import { WeedDetector } from "./weed_detector";
 import { WDENVKey } from "./remote_env/interfaces";
 import { t } from "../i18next_wrapper";
-import { Collapse } from "@blueprintjs/core";
+import { Collapse, Divider } from "@blueprintjs/core";
 import { ExpandableHeader, ToolTip } from "../ui";
 import { Actions, ToolTips } from "../constants";
 import { requestFarmwareUpdate } from "../farmware/farmware_info";
@@ -29,6 +29,11 @@ import { FarmwareForm } from "../farmware/farmware_forms";
 import { BooleanSetting } from "../session_keys";
 import { maybeOpenPanel } from "../settings/maybe_highlight";
 import { DevSettings } from "../settings/dev/dev_support";
+import { forceOnline } from "../devices/must_be_online";
+import { initSave } from "../api/crud";
+import { moveMeasureDemo } from "../devices/actions";
+import { demoPos, demoImages, demoTakePhoto, demoLabel, setLabel } from "../demo/demo_support_framework/supports";
+import {GenericPointer } from "farmbot/dist/resources/api_resources";
 
 export class RawDesignerPhotos
   extends React.Component<DesignerPhotosProps> {
@@ -47,6 +52,34 @@ export class RawDesignerPhotos
       size: this.props.currentImageSize,
     });
   }
+
+	handleMeasure = () => {
+		moveMeasureDemo(10); 
+		setTimeout(()=>moveMeasureDemo(-10), 2000); 
+		setTimeout(()=>demoTakePhoto(), 2000); 
+		const imageZ: number = demoImages[0].body.meta.z || 0; 
+		const body: GenericPointer = {
+			pointer_type: "GenericPointer",
+			name: "SoilHeight Point",
+			meta: {
+				color: "green", 
+				created_by: "farm-designer",
+				type: "point",
+				...({ at_soil_level: "true" }),
+			},
+			x: demoPos.x || 0,
+			y: demoPos.y || 0,
+			z: demoPos.z || 0 - imageZ,
+			radius: 100,
+		};
+		setTimeout(() => this.props.dispatch(initSave("Point", body)), 2000);
+		if (demoLabel) {
+		  setTimeout(() => this.props.dispatch({
+			  type: Actions.TOGGLE_SOIL_HEIGHT_LABELS, payload: undefined
+		  }), 2000);  
+			setLabel(false); 
+	  }
+	}
 
   render() {
     const wDEnvGet = (key: WDENVKey) => envGet(key, this.props.wDEnv);
@@ -77,6 +110,7 @@ export class RawDesignerPhotos
           arduinoBusy={this.props.arduinoBusy}
           currentImageSize={this.props.currentImageSize}
           imageJobs={this.props.imageJobs} />
+				<Divider> </Divider>
         <ExpandableHeader
           expanded={photosPanelState.filter}
           title={t("Filter map photos")}
@@ -88,6 +122,7 @@ export class RawDesignerPhotos
         <Collapse isOpen={photosPanelState.filter}>
           <PhotoFilterSettings {...common} {...imageCommon} />
         </Collapse>
+				<Divider> </Divider>
         <ExpandableHeader
           expanded={photosPanelState.camera}
           title={t("Camera settings")}
@@ -100,6 +135,7 @@ export class RawDesignerPhotos
             version={this.props.versions["take-photo"] || ""}
             saveFarmwareEnv={this.props.saveFarmwareEnv} />
         </Collapse>
+				<Divider> </Divider>
         <ExpandableHeader
           expanded={!!photosPanelState.calibration}
           title={t("Camera calibration")}
@@ -124,6 +160,7 @@ export class RawDesignerPhotos
             V_HI={wDEnvGet("CAMERA_CALIBRATION_V_HI")}
             versions={this.props.versions} />
         </Collapse>
+				<Divider> </Divider>
         <ExpandableHeader
           expanded={!!photosPanelState.detection}
           title={t("Weed detection")}
@@ -137,6 +174,7 @@ export class RawDesignerPhotos
               BooleanSetting.show_advanced_settings)}
             saveFarmwareEnv={this.props.saveFarmwareEnv} />
         </Collapse>
+				<Divider> </Divider>
         <ExpandableHeader
           expanded={!!photosPanelState.measure}
           title={t("Measure soil height")}
@@ -156,9 +194,16 @@ export class RawDesignerPhotos
                 BooleanSetting.show_advanced_settings)}
               dispatch={this.props.dispatch} />
             : <div className={"farmware-form"}>
-              <button className={"fb-button green farmware-button pseudo-disabled"}>
+              {forceOnline()
+							? <button className={"fb-button green farmware-button"}
+							  onClick={this.handleMeasure}
+							>
+								{t("measure")}
+							</button>
+							
+							: <button className={"fb-button green farmware-button pseudo-disabled"}>
                 {t("measure")}
-              </button>
+              </button>}
             </div>}
         </Collapse>
         {DevSettings.futureFeaturesEnabled() &&

@@ -7,9 +7,10 @@ import {
   FlagDisplayRowProps, ImageFilterProps, ImageShowProps,
 } from "./interfaces";
 import { getImageTypeLabel } from "../photo_filter_settings/util";
+import { forceOnline } from "../../devices/must_be_online";
 
 export const ImageShowMenuTarget = (props: ImageFilterProps) => {
-  const shownInMap = every(Object.values(props.flags));
+  const shownInMap = every(Object.values(props.flags)) || forceOnline();
   return <i
     className={shownInMap
       ? "fa fa-eye green"
@@ -41,7 +42,7 @@ const ShownInMapDetails = (props: ImageShowProps) => {
     <FlagDisplayRow flag={flags.layerOn}
       labelOk={t("Map photo layer on")}
       labelNo={t("Map photo layer off")} />
-    <FlagDisplayRow flag={flags.inRange}
+    <FlagDisplayRow flag={flags.inRange || forceOnline()}
       title={image?.body.created_at}
       labelOk={t("Within filter range")}
       labelNo={t("Outside of filter range")} />
@@ -78,7 +79,7 @@ const HideImage =
       <div className={"content"}>
         <button
           className={"fb-button yellow"}
-          disabled={!(flags.zMatch && flags.inRange)}
+          disabled={!(flags.zMatch && flags.inRange || forceOnline())}
           title={flags.notHidden ? t("hide") : t("show")}
           onClick={() => image?.body.id
             && dispatch(toggleHideImage(flags.notHidden, image.body.id))}>

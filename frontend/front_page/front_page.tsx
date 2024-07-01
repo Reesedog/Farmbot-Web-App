@@ -16,7 +16,7 @@ import { LaptopSplash } from "./laptop_splash";
 import { TermsCheckbox } from "./terms_checkbox";
 import { get } from "lodash";
 import { t } from "../i18next_wrapper";
-import { ToastContainer } from "../toast/fb_toast";
+import { AdContainer, ToastContainer } from "../toast/fb_toast";
 import { FilePath, Path } from "../internal_urls";
 
 export const DEFAULT_APP_PAGE = Path.app();
@@ -268,6 +268,7 @@ export class FrontPage extends React.Component<{}, Partial<FrontPageState>> {
         </Row>
       </div>
       <ToastContainer />
+      <AdContainer />
     </div>;
   }
 

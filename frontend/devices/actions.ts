@@ -3,21 +3,21 @@ import { success, warning, info, error } from "../toast/toast";
 import { getDevice } from "../device";
 import { Everything } from "../interfaces";
 import {
-  MoveRelProps, MinOsFeatureLookup, SourceFwConfig, Axis, MoveProps,
+	MoveRelProps, MinOsFeatureLookup, SourceFwConfig, Axis, MoveProps,
 } from "./interfaces";
 import { Thunk } from "../redux/interfaces";
 import {
-  McuParams, TaggedFirmwareConfig, ParameterApplication,
-  ALLOWED_PIN_MODES,
-  FirmwareHardware,
-  Pair,
-  rpcRequest,
-  SafeZ,
-  MoveBodyItem,
-  SpeedOverwrite,
-  Xyz,
-  AxisOverwrite,
-  RpcRequestBodyItem,
+	McuParams, TaggedFirmwareConfig, ParameterApplication,
+	ALLOWED_PIN_MODES,
+	FirmwareHardware,
+	Pair,
+	rpcRequest,
+	SafeZ,
+	MoveBodyItem,
+	SpeedOverwrite,
+	Xyz,
+	AxisOverwrite,
+	RpcRequestBodyItem,
 } from "farmbot";
 import { oneOf, versionOK, trim } from "../util";
 import { Actions, Content } from "../constants";
@@ -35,6 +35,7 @@ import { goToFbosSettings } from "../settings/maybe_highlight";
 import { ToastOptions } from "../toast/interfaces";
 import { forceOnline } from "./must_be_online";
 import { store } from "../redux/store";
+import { demoPos, map_limit, maybePopupAd } from "../demo/demo_support_framework/supports";
 
 const ON = 1, OFF = 0;
 export type ConfigKey = keyof McuParams;
@@ -44,205 +45,229 @@ const BAD_WORDS = ["WPA", "PSK", "PASSWORD", "NERVES"];
 const MESSAGE: keyof Log = "message";
 
 export function isLog(x: unknown): x is Log {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  const msg = get(x, MESSAGE) as unknown;
-  const yup = isObject(x) && isString(msg);
-  if (yup) {
-    if (oneOf(BAD_WORDS, msg.toUpperCase())) { // SECURITY CRITICAL CODE.
-      console.error("Refusing to display log: " + JSON.stringify(x));
-      return false;
-    }
-    return true;
-  } else {
-    return false;
-  }
+	// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+	const msg = get(x, MESSAGE) as unknown;
+	const yup = isObject(x) && isString(msg);
+	if (yup) {
+		if (oneOf(BAD_WORDS, msg.toUpperCase())) { // SECURITY CRITICAL CODE.
+			console.error("Refusing to display log: " + JSON.stringify(x));
+			return false;
+		}
+		return true;
+	} else {
+		return false;
+	}
 }
 
 /** Toast message upon request error. */
 export const commandErr =
-  (noun = "Command") => () => error(t(`${noun} failed`));
+	(noun = "Command") => () => error(t(`${noun} failed`));
 
 /** Toast message upon request success. */
 export const commandOK = (noun = "Command", message?: string) => () => {
-  if (forceOnline()) { return maybeNoop(); }
-  const msg = message || (t(noun) + t(" request sent to device."));
-  success(msg, { title: t("Request sent") });
+	if (forceOnline()) { return maybeNoop(); }
+	const msg = message || (t(noun) + t(" request sent to device."));
+	success(msg, { title: t("Request sent") });
 };
 
-const maybeNoop = () =>
+export const popUp = (title: string, message:string) =>
   forceOnline() &&
-  info(t("Sorry, that feature is unavailable in demo accounts."), {
-    title: t("Unavailable")
+  info(t(message), {
+    title: t(title)
   });
 
+const maybeNoop = () =>
+	forceOnline() &&
+	info(t("HarvestX"), {
+		title: t("HarvestX")
+	});
+
+// simple function for when no initial values exist demo feature
+const maybeUninitialised = () =>
+	forceOnline() &&
+	info(t("location data uninitialised"), {
+		title: t("Demo Warning")
+	});
+
+// simple function for when a move is valid demo feature only
+const maybeOutofBound = () =>
+	forceOnline() &&
+	info(t("destination invalid"), {
+		title: t("Invalid destination")
+	});
+
 const maybeAlertLocked = () =>
-  store.getState().bot.hardware.informational_settings.locked &&
-  error(t("Command not available while locked."),
-    { title: t("Emergency stop active") });
+	store.getState().bot.hardware.informational_settings.locked &&
+	error(t("Command not available while locked."),
+		{ title: t("Emergency stop active") });
 
 /** Send RPC. */
 export function sendRPC(command: RpcRequestBodyItem) {
-  maybeNoop();
-  getDevice()
-    .send(rpcRequest([command]))
-    .then(maybeNoop, commandErr());
+	maybeNoop();
+	getDevice()
+		.send(rpcRequest([command]))
+		.then(maybeNoop, commandErr());
 }
 
 /** Request bot state update. */
 export function readStatus() {
-  getDevice()
-    .readStatus()
-    .then(noop, noop);
+	getDevice()
+		.readStatus()
+		.then(noop, noop);
 }
 
 /** Request bot state update and return promise. */
 export function readStatusReturnPromise() {
-  return getDevice()
-    .readStatus()
-    .then(noop, noop);
+	return getDevice()
+		.readStatus()
+		.then(noop, noop);
 }
 
 /** Update FBOS. */
 export function checkControllerUpdates() {
-  const noun = t("Check for Updates");
-  commandOK(noun)();
-  getDevice()
-    .checkUpdates()
-    .catch(commandErr(noun));
+	const noun = t("Check for Updates");
+	commandOK(noun)();
+	getDevice()
+		.checkUpdates()
+		.catch(commandErr(noun));
 }
 
 /** Shutdown FBOS. */
 export function powerOff() {
-  const noun = t("Power Off Bot");
-  maybeNoop();
-  getDevice()
-    .powerOff()
-    .then(commandOK(noun), commandErr(noun));
+	const noun = t("Power Off Bot");
+	popUp("Shut Down", "Buy FarmBot device to unlock this feature~ 😍");
+	getDevice()
+		.powerOff()
+		.then(commandOK(noun), commandErr(noun));
 }
 
 /** Soft reset FBOS. */
 export function softReset() {
-  if (!confirm(t(Content.SOFT_RESET_ALERT))) {
-    return;
-  }
-  maybeNoop();
-  getDevice().resetOS();
+	if (!confirm(t(Content.SOFT_RESET_ALERT))) {
+		return;
+	}
+	popUp("Soft Reset", "FarmBot reset successfully!");
+	moveToHomeDemo("all");
+
+	getDevice().resetOS();
 }
 
 /** Reboot FBOS. */
 export function reboot() {
-  const noun = t("Reboot Bot");
-  maybeNoop();
-  getDevice()
-    .reboot()
-    .then(commandOK(noun), commandErr(noun));
+	const noun = t("Reboot Bot");
+	popUp("Restart", "FarmBot restart successfully!");
+	moveToHomeDemo("all");
+	getDevice()
+		.reboot()
+		.then(commandOK(noun), commandErr(noun));
+
 }
 
 /** Restart Farmduino firmware serial connection. */
 export function restartFirmware() {
-  const noun = t("Restart Firmware");
-  maybeNoop();
-  const device = getDevice();
-  return device
-    .rebootFirmware()
-    .then(device.emergencyLock)
-    .then(device.emergencyUnlock)
-    .then(commandOK(noun), commandErr(noun));
+	const noun = t("Restart Firmware");
+	maybeNoop();
+	const device = getDevice();
+	return device
+		.rebootFirmware()
+		.then(device.emergencyLock)
+		.then(device.emergencyUnlock)
+		.then(commandOK(noun), commandErr(noun));
 }
 
 export function flashFirmware(firmwareName: FirmwareHardware) {
-  const noun = t("Flash Firmware");
-  maybeNoop();
-  getDevice()
-    .flashFirmware(firmwareName)
-    .then(commandOK(noun), commandErr(noun));
+	const noun = t("Flash Firmware");
+	maybeNoop();
+	getDevice()
+		.flashFirmware(firmwareName)
+		.then(commandOK(noun), commandErr(noun));
 }
 
 export function emergencyLock() {
-  const noun = t("Emergency stop");
-  maybeNoop();
-  getDevice()
-    .emergencyLock()
-    .then(commandOK(noun), commandErr(noun));
+	const noun = t("Emergency stop");
+	maybeNoop();
+	getDevice()
+		.emergencyLock()
+		.then(commandOK(noun), commandErr(noun));
 }
 
 export function emergencyUnlock(force = false) {
-  const noun = t("Emergency unlock");
-  if (force || confirm(t("Are you sure you want to unlock the device?"))) {
-    maybeNoop();
-    getDevice()
-      .emergencyUnlock()
-      .then(commandOK(noun), commandErr(noun));
-  }
+	const noun = t("Emergency unlock");
+	if (force || confirm(t("Are you sure you want to unlock the device?"))) {
+		maybeNoop();
+		getDevice()
+			.emergencyUnlock()
+			.then(commandOK(noun), commandErr(noun));
+	}
 }
 
 export function sync(): Thunk {
-  const noun = t("Sync");
-  return function (_dispatch, getState) {
-    const currentFBOSversion =
-      getState().bot.hardware.informational_settings.controller_version;
-    const IS_OK = versionOK(currentFBOSversion);
-    if (IS_OK) {
-      maybeNoop();
-      getDevice()
-        .sync()
-        .catch(commandErr(noun));
-    } else {
-      if (currentFBOSversion) {
-        badVersion();
-      } else {
-        info(t("FarmBot is not connected."), {
-          title: t("Disconnected"), color: "red",
-        });
-      }
-    }
-  };
+	const noun = t("Sync");
+	return function (_dispatch, getState) {
+		const currentFBOSversion =
+			getState().bot.hardware.informational_settings.controller_version;
+		const IS_OK = versionOK(currentFBOSversion);
+		if (IS_OK) {
+			maybeNoop();
+			getDevice()
+				.sync()
+				.catch(commandErr(noun));
+		} else {
+			if (currentFBOSversion) {
+				badVersion();
+			} else {
+				info(t("FarmBot is not connected."), {
+					title: t("Disconnected"), color: "red",
+				});
+			}
+		}
+	};
 }
 
 export function execSequence(
-  sequenceId: number | undefined,
-  bodyVariables?: ParameterApplication[],
+	sequenceId: number | undefined,
+	bodyVariables?: ParameterApplication[],
 ) {
-  const noun = t("Sequence execution");
-  if (sequenceId) {
-    commandOK(noun)();
-    return getDevice()
-      .execSequence(sequenceId, bodyVariables)
-      .catch((x: Error) => {
-        if (x && (typeof x == "object") && (typeof x.message == "string")) {
-          error(x.message);
-        } else {
-          commandErr(noun)();
-        }
-      });
-  } else {
-    throw new Error(t("Can't execute unsaved sequences"));
-  }
+	const noun = t("Sequence execution");
+	if (sequenceId) {
+		commandOK(noun)();
+		return getDevice()
+			.execSequence(sequenceId, bodyVariables)
+			.catch((x: Error) => {
+				if (x && (typeof x == "object") && (typeof x.message == "string")) {
+					error(x.message);
+				} else {
+					commandErr(noun)();
+				}
+			});
+	} else {
+		throw new Error(t("Can't execute unsaved sequences"));
+	}
 }
 
 export function takePhoto() {
-  maybeNoop();
-  getDevice().takePhoto()
-    .then(commandOK("", Content.PROCESSING_PHOTO))
-    .catch(() => error(t("Error taking photo")));
+	maybeNoop();
+	getDevice().takePhoto()
+		.then(commandOK("", Content.PROCESSING_PHOTO))
+		.catch(() => error(t("Error taking photo")));
 }
 
 export function runFarmware(
-  farmwareName: string,
-  pairs?: Pair[],
-  errorMsg?: string,
+	farmwareName: string,
+	pairs?: Pair[],
+	errorMsg?: string,
 ) {
-  maybeNoop();
-  getDevice().execScript(farmwareName, pairs)
-    .then(maybeNoop, errorMsg ? commandErr(errorMsg) : noop);
+	maybeNoop();
+	getDevice().execScript(farmwareName, pairs)
+		.then(maybeNoop, errorMsg ? commandErr(errorMsg) : noop);
 }
 
 export function updateFarmware(farmwareName: string) {
-  maybeNoop();
-  getDevice()
-    .updateFarmware(farmwareName)
-    .then(maybeNoop)
-    .catch(commandErr("Update"));
+	maybeNoop();
+	getDevice()
+		.updateFarmware(farmwareName)
+		.then(maybeNoop)
+		.catch(commandErr("Update"));
 }
 
 /**
@@ -250,265 +275,329 @@ export function updateFarmware(farmwareName: string) {
  * @param x axios response data
  */
 function validMinOsFeatureLookup(x: MinOsFeatureLookup): boolean {
-  return isObject(x) &&
-    Object.entries(x).every(([key, val]) =>
-      typeof key === "string" && // feature name
-      typeof val === "string" && // version string
-      val.split(".").length > 2); // "0.0.0"
+	return isObject(x) &&
+		Object.entries(x).every(([key, val]) =>
+			typeof key === "string" && // feature name
+			typeof val === "string" && // version string
+			val.split(".").length > 2); // "0.0.0"
 }
 
 /**
  * Fetch and save minimum FBOS version data for UI feature display.
  */
 export const fetchMinOsFeatureData = () =>
-  (dispatch: Function) => {
-    axios
-      .get<MinOsFeatureLookup>(ExternalUrl.featureMinVersions)
-      .then(resp => {
-        const data = resp.data;
-        if (validMinOsFeatureLookup(data)) {
-          dispatch({
-            type: Actions.FETCH_MIN_OS_FEATURE_INFO_OK,
-            payload: data
-          });
-        } else {
-          console.log(`Warning! Got '${JSON.stringify(data)}', ` +
-            "expected min OS feature data.");
-        }
-      })
-      .catch((ferror) => {
-        dispatch({
-          type: Actions.FETCH_MIN_OS_FEATURE_INFO_ERROR,
-          payload: ferror
-        });
-      });
-  };
+	(dispatch: Function) => {
+		axios
+			.get<MinOsFeatureLookup>(ExternalUrl.featureMinVersions)
+			.then(resp => {
+				const data = resp.data;
+				if (validMinOsFeatureLookup(data)) {
+					dispatch({
+						type: Actions.FETCH_MIN_OS_FEATURE_INFO_OK,
+						payload: data
+					});
+				} else {
+					console.log(`Warning! Got '${JSON.stringify(data)}', ` +
+						"expected min OS feature data.");
+				}
+			})
+			.catch((ferror) => {
+				dispatch({
+					type: Actions.FETCH_MIN_OS_FEATURE_INFO_ERROR,
+					payload: ferror
+				});
+			});
+	};
 
 /**
 * Fetch and save FBOS release notes.
 */
 export const fetchOsReleaseNotes = () =>
-  (dispatch: Function) => {
-    axios
-      .get<string>(ExternalUrl.osReleaseNotes)
-      .then(resp => {
-        dispatch({
-          type: Actions.FETCH_OS_RELEASE_NOTES_OK,
-          payload: resp.data
-        });
-      })
-      .catch((ferror) => {
-        dispatch({
-          type: Actions.FETCH_OS_RELEASE_NOTES_ERROR,
-          payload: ferror
-        });
-      });
-  };
+	(dispatch: Function) => {
+		axios
+			.get<string>(ExternalUrl.osReleaseNotes)
+			.then(resp => {
+				dispatch({
+					type: Actions.FETCH_OS_RELEASE_NOTES_OK,
+					payload: resp.data
+				});
+			})
+			.catch((ferror) => {
+				dispatch({
+					type: Actions.FETCH_OS_RELEASE_NOTES_ERROR,
+					payload: ferror
+				});
+			});
+	};
 
 /** Factory reset all firmware settings. */
 export function MCUFactoryReset() {
-  if (!confirm(t(Content.MCU_RESET_ALERT))) {
-    return;
-  }
-  maybeNoop();
-  getDevice().resetMCU().catch(commandErr("MCU Reset"));
+	if (!confirm(t(Content.MCU_RESET_ALERT))) {
+		return;
+	}
+	maybeNoop();
+	getDevice().resetMCU().catch(commandErr("MCU Reset"));
 }
 
 /** Toggle a firmware setting. */
 export function settingToggle(
-  key: ConfigKey,
-  sourceFwConfig: SourceFwConfig,
-  displayAlert?: string | undefined,
+	key: ConfigKey,
+	sourceFwConfig: SourceFwConfig,
+	displayAlert?: string | undefined,
 ) {
-  return function (dispatch: Function, getState: () => Everything) {
-    if (displayAlert) { alert(trim(displayAlert)); }
-    const update = { [key]: (sourceFwConfig(key).value === 0) ? ON : OFF };
-    const firmwareConfig = getFirmwareConfig(getState().resources.index);
-    const toggleFirmwareConfig = (fwConfig: TaggedFirmwareConfig) => {
-      dispatch(edit(fwConfig, update));
-      dispatch(apiSave(fwConfig.uuid));
-    };
+	return function (dispatch: Function, getState: () => Everything) {
+		if (displayAlert) { alert(trim(displayAlert)); }
+		const update = { [key]: (sourceFwConfig(key).value === 0) ? ON : OFF };
+		const firmwareConfig = getFirmwareConfig(getState().resources.index);
+		const toggleFirmwareConfig = (fwConfig: TaggedFirmwareConfig) => {
+			dispatch(edit(fwConfig, update));
+			dispatch(apiSave(fwConfig.uuid));
+		};
 
-    if (firmwareConfig) {
-      return toggleFirmwareConfig(firmwareConfig);
-    }
-  };
+		if (firmwareConfig) {
+			return toggleFirmwareConfig(firmwareConfig);
+		}
+	};
 }
 
 export function moveRelative(props: MoveRelProps) {
-  maybeNoop();
-  maybeAlertLocked();
-  return getDevice()
-    .moveRelative(props)
-    .then(maybeNoop, commandErr("Relative movement"));
+	maybeNoop();
+	maybeAlertLocked();
+	// use force bot online to determine if its demo
+	return getDevice()
+		.moveRelative(props)
+		.then(maybeNoop, commandErr("Relative movement"));
+}
+
+// simulated movement sending no rpc
+export function moveRelativeDemo(props: MoveRelProps) {
+	maybePopupAd();
+	if (demoPos.x !== undefined && demoPos.y !== undefined && demoPos.z !== undefined) {
+		demoPos.x = demoPos.x + props.x;
+		demoPos.y = demoPos.y + props.y;
+		demoPos.z = demoPos.z + props.z;
+	} else {
+		maybeUninitialised();
+	}
+}
+
+// manipulate demo parameters within demo mode
+export function moveMeasureDemo(step: number) {
+	maybePopupAd();
+	if (demoPos.y !== undefined) {
+		demoPos.y += step;
+	}
 }
 
 export function moveAbsolute(props: MoveRelProps) {
-  const noun = t("Absolute movement");
-  maybeNoop();
-  maybeAlertLocked();
-  return getDevice()
-    .moveAbsolute(props)
-    .then(maybeNoop, commandErr(noun));
+	const noun = t("Absolute movement");
+	maybeNoop();
+	maybeAlertLocked();
+	return getDevice()
+		.moveAbsolute(props)
+		.then(maybeNoop, commandErr(noun));
+}
+
+// demo feature for moving displacement data
+export function moveAbsoluteDemo(props: MoveRelProps) {
+	maybePopupAd();
+	// check whether a movement is valid
+	const noun = t("Absolute movement");
+	if (props.x < 0 || props.x > map_limit.x ||
+		props.y < 0 || props.y > map_limit.y ||
+		props.z < 0 || props.z > map_limit.z) {
+		maybeOutofBound();
+		return getDevice()
+			.moveAbsolute(props)
+			.then(maybeOutofBound, commandErr(noun));
+	}
+	// accept the move if it is valid
+	if (demoPos.x !== undefined && demoPos.y !== undefined && demoPos.z !== undefined) {
+		demoPos.x = props.x;
+		demoPos.y = props.y;
+		demoPos.z = props.z;
+	} else {
+		maybeUninitialised();
+	}
+	return getDevice()
+		.moveAbsolute(props)
+		.then(maybeNoop, commandErr(noun));
 }
 
 export function move(props: MoveProps) {
-  const noun = t("Movement");
-  maybeNoop();
-  maybeAlertLocked();
-  const safeZ: SafeZ = { kind: "safe_z", args: {} };
-  const speedOverwrite = (axis: Xyz, speed: number): SpeedOverwrite => ({
-    kind: "speed_overwrite",
-    args: {
-      axis,
-      speed_setting: {
-        kind: "numeric", args: { number: speed }
-      }
-    },
-  });
-  const positionOverwrite = (axis: Xyz): AxisOverwrite => ({
-    kind: "axis_overwrite",
-    args: {
-      axis,
-      axis_operand: {
-        kind: "coordinate", args: {
-          x: props.x,
-          y: props.y,
-          z: props.z,
-        }
-      },
-    }
-  });
-  const body: MoveBodyItem[] = [
-    positionOverwrite("x"),
-    positionOverwrite("y"),
-    positionOverwrite("z"),
-    ...(props.speed ? [speedOverwrite("x", props.speed)] : []),
-    ...(props.speed ? [speedOverwrite("y", props.speed)] : []),
-    ...(props.speed ? [speedOverwrite("z", props.speed)] : []),
-    ...(props.safeZ ? [safeZ] : []),
-  ];
-  return getDevice()
-    .send(rpcRequest([{ kind: "move", args: {}, body }]))
-    .then(maybeNoop, commandErr(noun));
+	const noun = t("Movement");
+	maybeNoop();
+	maybeAlertLocked();
+	const safeZ: SafeZ = { kind: "safe_z", args: {} };
+	const speedOverwrite = (axis: Xyz, speed: number): SpeedOverwrite => ({
+		kind: "speed_overwrite",
+		args: {
+			axis,
+			speed_setting: {
+				kind: "numeric", args: { number: speed }
+			}
+		},
+	});
+	const positionOverwrite = (axis: Xyz): AxisOverwrite => ({
+		kind: "axis_overwrite",
+		args: {
+			axis,
+			axis_operand: {
+				kind: "coordinate", args: {
+					x: props.x,
+					y: props.y,
+					z: props.z,
+				}
+			},
+		}
+	});
+	const body: MoveBodyItem[] = [
+		positionOverwrite("x"),
+		positionOverwrite("y"),
+		positionOverwrite("z"),
+		...(props.speed ? [speedOverwrite("x", props.speed)] : []),
+		...(props.speed ? [speedOverwrite("y", props.speed)] : []),
+		...(props.speed ? [speedOverwrite("z", props.speed)] : []),
+		...(props.safeZ ? [safeZ] : []),
+	];
+	return getDevice()
+		.send(rpcRequest([{ kind: "move", args: {}, body }]))
+		.then(maybeNoop, commandErr(noun));
 }
 
 export function pinToggle(pin_number: number) {
-  const noun = t("Setting toggle");
-  maybeNoop();
-  maybeAlertLocked();
-  return getDevice()
-    .togglePin({ pin_number })
-    .then(maybeNoop, commandErr(noun));
+	const noun = t("Setting toggle");
+	maybeNoop();
+	maybeAlertLocked();
+	return getDevice()
+		.togglePin({ pin_number })
+		.then(maybeNoop, commandErr(noun));
 }
 
 export function readPin(
-  pin_number: number, label: string, pin_mode: ALLOWED_PIN_MODES,
+	pin_number: number, label: string, pin_mode: ALLOWED_PIN_MODES,
 ) {
-  const noun = t("Read pin");
-  maybeNoop();
-  return getDevice()
-    .readPin({ pin_number, label, pin_mode })
-    .then(maybeNoop, commandErr(noun));
+	const noun = t("Read pin");
+	maybeNoop();
+	return getDevice()
+		.readPin({ pin_number, label, pin_mode })
+		.then(maybeNoop, commandErr(noun));
 }
 
 export function writePin(
-  pin_number: number, pin_value: number, pin_mode: ALLOWED_PIN_MODES,
+	pin_number: number, pin_value: number, pin_mode: ALLOWED_PIN_MODES,
 ) {
-  const noun = t("Write pin");
-  maybeNoop();
-  maybeAlertLocked();
-  return getDevice()
-    .writePin({ pin_number, pin_mode, pin_value })
-    .then(maybeNoop, commandErr(noun));
+	const noun = t("Write pin");
+	maybeNoop();
+	maybeAlertLocked();
+	return getDevice()
+		.writePin({ pin_number, pin_mode, pin_value })
+		.then(maybeNoop, commandErr(noun));
 }
 
 export function moveToHome(axis: Axis) {
-  const noun = t("'Move To Home' command");
-  maybeNoop();
-  maybeAlertLocked();
-  getDevice()
-    .home({ axis, speed: CONFIG_DEFAULTS.speed })
-    .catch(commandErr(noun));
+	const noun = t("'Move To Home' command");
+	maybeNoop();
+	maybeAlertLocked();
+	getDevice()
+		.home({ axis, speed: CONFIG_DEFAULTS.speed })
+		.catch(commandErr(noun));
+}
+
+// demo function return to home
+export function moveToHomeDemo(axis: Axis) {
+	maybePopupAd();
+	// move back to home if it is valid
+	const noun = t("'Move To Home' command");
+	if (demoPos.x !== undefined && demoPos.y !== undefined && demoPos.z !== undefined) {
+		demoPos.x = 0;
+		demoPos.y = 0;
+		demoPos.z = 0;
+	} else {
+		maybeUninitialised();
+	}
+	getDevice()
+		.home({ axis, speed: CONFIG_DEFAULTS.speed })
+		.catch(commandErr(noun));
 }
 
 export function findHome(axis: Axis) {
-  const noun = t("'Find Home' command");
-  maybeNoop();
-  maybeAlertLocked();
-  getDevice()
-    .findHome({ axis, speed: CONFIG_DEFAULTS.speed })
-    .catch(commandErr(noun));
+	const noun = t("'Find Home' command");
+	maybeNoop();
+	maybeAlertLocked();
+	getDevice()
+		.findHome({ axis, speed: CONFIG_DEFAULTS.speed })
+		.catch(commandErr(noun));
 }
 
 export function setHome(axis: Axis) {
-  const noun = t("'Set Home' command");
-  maybeNoop();
-  getDevice()
-    .setZero(axis)
-    .catch(commandErr(noun));
+	const noun = t("'Set Home' command");
+	maybeNoop();
+	getDevice()
+		.setZero(axis)
+		.catch(commandErr(noun));
 }
 
 export function findAxisLength(axis: Axis) {
-  const noun = t("'Find Axis Length' command");
-  maybeNoop();
-  maybeAlertLocked();
-  getDevice()
-    .calibrate({ axis })
-    .catch(commandErr(noun));
+	const noun = t("'Find Axis Length' command");
+	maybeNoop();
+	maybeAlertLocked();
+	getDevice()
+		.calibrate({ axis })
+		.catch(commandErr(noun));
 }
 
 /** Update firmware setting. */
 export function updateMCU(key: ConfigKey, val: string) {
-  return function (dispatch: Function, getState: () => Everything) {
-    const firmwareConfig = getFirmwareConfig(getState().resources.index);
-    const getParams = () => {
-      if (firmwareConfig) {
-        return firmwareConfig.body;
-      } else {
-        return getState().bot.hardware.mcu_params;
-      }
-    };
+	return function (dispatch: Function, getState: () => Everything) {
+		const firmwareConfig = getFirmwareConfig(getState().resources.index);
+		const getParams = () => {
+			if (firmwareConfig) {
+				return firmwareConfig.body;
+			} else {
+				return getState().bot.hardware.mcu_params;
+			}
+		};
 
-    function proceed() {
-      if (firmwareConfig) {
-        dispatch(edit(firmwareConfig, { [key]: val } as Partial<FirmwareConfig>));
-        dispatch(apiSave(firmwareConfig.uuid));
-      }
-    }
+		function proceed() {
+			if (firmwareConfig) {
+				dispatch(edit(firmwareConfig, { [key]: val } as Partial<FirmwareConfig>));
+				dispatch(apiSave(firmwareConfig.uuid));
+			}
+		}
 
-    const dont = (err: string) => warning(err);
+		const dont = (err: string) => warning(err);
 
-    const validate = mcuParamValidator(key, parseInt(val, 10), getParams());
-    validate(proceed, dont);
-  };
+		const validate = mcuParamValidator(key, parseInt(val, 10), getParams());
+		validate(proceed, dont);
+	};
 }
 
 /** Update FBOS setting. */
 export function updateConfig(config: Partial<FbosConfig>) {
-  return function (dispatch: Function, getState: () => Everything) {
-    const fbosConfig = getFbosConfig(getState().resources.index);
-    if (fbosConfig) {
-      dispatch(edit(fbosConfig, config));
-      dispatch(apiSave(fbosConfig.uuid));
-    }
-  };
+	return function (dispatch: Function, getState: () => Everything) {
+		const fbosConfig = getFbosConfig(getState().resources.index);
+		if (fbosConfig) {
+			dispatch(edit(fbosConfig, config));
+			dispatch(apiSave(fbosConfig.uuid));
+		}
+	};
 }
 
 /** Change jog button movement amount. */
 export function changeStepSize(integer: number) {
-  return {
-    type: Actions.CHANGE_STEP_SIZE,
-    payload: integer
-  };
+	return {
+		type: Actions.CHANGE_STEP_SIZE,
+		payload: integer
+	};
 }
 
 export function badVersion(options: ToastOptions = { noDismiss: true }) {
-  goToFbosSettings();
-  error(t(Content.OLD_FBOS_UNSUPPORTED), {
-    title: t("Please Update"),
-    noTimer: true,
-    idPrefix: "EOL",
-    ...options,
-  });
+	goToFbosSettings();
+	error(t(Content.OLD_FBOS_UNSUPPORTED), {
+		title: t("Please Update"),
+		noTimer: true,
+		idPrefix: "EOL",
+		...options,
+	});
 }

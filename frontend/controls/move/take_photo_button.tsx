@@ -6,6 +6,8 @@ import { cameraBtnProps } from "../../photos/capture_settings/camera_selection";
 import { Popover } from "../../ui";
 import { greaterThanTime, recentMsgLog } from "../../wizard/checks";
 import { TakePhotoButtonProps } from "./interfaces";
+import { forceOnline } from "../../devices/must_be_online";
+import { demoTakePhoto } from "../../demo/demo_support_framework/supports";
 
 interface TakePhotoButtonState {
   clickedAt: number | undefined;
@@ -38,12 +40,14 @@ export class TakePhotoButton
     const inProgress = recentlyClicked && !done && botOnline;
     return <button
       className={[
-        inProgress ? "in-progress" : "fa fa-camera",
+        inProgress ? "in-progress" : "fa fa-camera green",
         "arrow-button fb-button",
         camDisabled.class,
       ].join(" ")}
       title={camDisabled.title || t("Take a photo")}
-      onClick={camDisabled.click || sendCommand}>
+      onClick={() => forceOnline() 
+				? demoTakePhoto()
+				: camDisabled.click || sendCommand}>
       {!botOnline &&
         <Popover
           popoverClassName={"help camera-message"}

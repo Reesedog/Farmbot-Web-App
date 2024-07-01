@@ -2,6 +2,9 @@ import React from "react";
 import { MapTransformProps } from "../../interfaces";
 import { CameraCalibrationData, DesignerState } from "../../../interfaces";
 import { TaggedImage } from "farmbot";
+import { forceOnline } from "../../../../devices/must_be_online";
+
+
 import { MapImage } from "./map_image";
 import { reverse, cloneDeep, some } from "lodash";
 import { equals } from "../../../../util";
@@ -11,6 +14,8 @@ import {
   parseFilterSetting, IMAGE_LAYER_CONFIG_KEYS, imageInRange, imageIsHidden,
   filterImagesByType,
 } from "../../../../photos/photo_filter_settings/util";
+import { checkUpdate, demoImages } from "../../../../demo/demo_support_framework/supports";
+
 
 export interface ImageLayerProps {
   visible: boolean;
@@ -26,12 +31,12 @@ export class ImageLayer extends React.Component<ImageLayerProps> {
   shouldComponentUpdate(nextProps: ImageLayerProps) {
     const configsChanged = some(IMAGE_LAYER_CONFIG_KEYS.map(key =>
       this.props.getConfigValue(key) != nextProps.getConfigValue(key)));
-    return !equals(this.props, nextProps) || configsChanged;
+    return !equals(this.props, nextProps) || configsChanged || checkUpdate();
   }
 
   render() {
     const {
-      visible, images, mapTransformProps, cameraCalibrationData,
+      visible, images: originalImages, mapTransformProps, cameraCalibrationData,
       getConfigValue,
     } = this.props;
     const { hiddenImages, shownImages,
@@ -41,7 +46,10 @@ export class ImageLayer extends React.Component<ImageLayerProps> {
     const clipImageLayer = !!getConfigValue(BooleanSetting.clip_image_layer);
     const getFilterValue = parseFilterSetting(getConfigValue);
     const imageFilterBegin = getFilterValue(StringSetting.photo_filter_begin);
-    const imageFilterEnd = getFilterValue(StringSetting.photo_filter_end);
+    const imageFilterEnd = getFilterValue(StringSetting.photo_filter_end); 
+
+    const images = forceOnline() ? demoImages : originalImages;
+
     const hoveredImage: TaggedImage | undefined =
       images.filter(img => img.body.id == hoveredMapImage
         || (alwaysHighlightImage && shownImages.includes(img.body.id || 0)))[0];

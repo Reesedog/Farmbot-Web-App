@@ -169,6 +169,7 @@ nav {
   .nav-coordinates,
   .jobs-button,
   .setup-button,
+  .tour-button,
   .connectivity-button {
     display: flex;
     position: relative;
@@ -215,6 +216,11 @@ nav {
     }
   }
   .setup-button {
+    display: inline-block;
+    margin-top: 1.5rem;
+  }
+
+  .tour-button {
     display: inline-block;
     margin-top: 1.5rem;
   }

@@ -47,7 +47,7 @@ import {
 } from "./settings/firmware/firmware_hardware_support";
 import { HelpState } from "./help/reducer";
 import { TourStepContainer } from "./help/tours";
-import { Toasts } from "./toast/fb_toast";
+import { Ads, Toasts } from "./toast/fb_toast";
 import Bowser from "bowser";
 import { landingPagePath, Path } from "./internal_urls";
 import { push } from "./history";
@@ -210,6 +210,11 @@ export class RawApp extends React.Component<AppProps, {}> {
           helpState={this.props.helpState} />
         <Toasts
           toastMessages={this.props.appState.toasts}
+          dispatch={dispatch} />
+      </div>
+      <div className={"ad-container"}>
+        <Ads
+          toastMessages={this.props.appState.ads}
           dispatch={dispatch} />
       </div>
     </div>;

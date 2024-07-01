@@ -85,3 +85,7 @@ export interface EStopButtonProps {
   bot: BotState;
   forceUnlock: boolean;
 }
+
+export interface FeedbackProps {
+  
+}

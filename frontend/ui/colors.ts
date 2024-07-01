@@ -29,4 +29,6 @@ export enum Color {
   curveDarkGreen = "#95be84",
   curvePurple = "#b4a7d6",
   curveDarkPurple = "#9383bc",
+  // use customized color in demo, added new color
+  lightGreen = "#BFFFC5",
 }

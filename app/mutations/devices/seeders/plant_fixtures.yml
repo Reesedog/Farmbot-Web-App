@@ -8,8 +8,8 @@
   pullout_direction: 0
   radius: 25.0
   depth: 0
-  x: 400.0
-  y: 100.0
+  x: 200.0
+  y: 200.0
   z: 0.0
 - meta: {}
   pointer_type: Plant
@@ -20,20 +20,8 @@
   pullout_direction: 0
   radius: 25.0
   depth: 0
-  x: 400.0
-  y: 300.0
-  z: 0.0
-- meta: {}
-  pointer_type: Plant
-  name: Spinach
-  openfarm_slug: spinach
-  plant_stage: planned
-  planted_at:
-  pullout_direction: 0
-  radius: 25.0
-  depth: 0
-  x: 600.0
-  y: 100.0
+  x: 200.0
+  y: 600.0
   z: 0.0
 - meta: {}
   pointer_type: Plant
@@ -45,7 +33,7 @@
   radius: 25.0
   depth: 0
   x: 600.0
-  y: 300.0
+  y: 200.0
   z: 0.0
 - meta: {}
   pointer_type: Plant
@@ -56,8 +44,8 @@
   pullout_direction: 0
   radius: 25.0
   depth: 0
-  x: 800.0
-  y: 300.0
+  x: 600.0
+  y: 600.0
   z: 0.0
 - meta: {}
   pointer_type: Plant
@@ -68,8 +56,20 @@
   pullout_direction: 0
   radius: 25.0
   depth: 0
-  x: 800.0
-  y: 100.0
+  x: 1000.0
+  y: 200.0
+  z: 0.0
+- meta: {}
+  pointer_type: Plant
+  name: Spinach
+  openfarm_slug: spinach
+  plant_stage: planned
+  planted_at:
+  pullout_direction: 0
+  radius: 25.0
+  depth: 0
+  x: 1000.0
+  y: 600.0
   z: 0.0
 - meta: {}
   pointer_type: Plant
@@ -80,44 +80,8 @@
   pullout_direction: 0
   radius: 25.0
   depth: 0
-  x: 600.0
-  y: 700.0
-  z: 0.0
-- meta: {}
-  pointer_type: Plant
-  name: Beets
-  openfarm_slug: beet
-  plant_stage: planned
-  planted_at:
-  pullout_direction: 0
-  radius: 25.0
-  depth: 0
-  x: 800.0
-  y: 1100.0
-  z: 0.0
-- meta: {}
-  pointer_type: Plant
-  name: Beets
-  openfarm_slug: beet
-  plant_stage: planned
-  planted_at:
-  pullout_direction: 0
-  radius: 25.0
-  depth: 0
-  x: 600.0
-  y: 1100.0
-  z: 0.0
-- meta: {}
-  pointer_type: Plant
-  name: Beets
-  openfarm_slug: beet
-  plant_stage: planned
-  planted_at:
-  pullout_direction: 0
-  radius: 25.0
-  depth: 0
-  x: 400.0
-  y: 1100.0
+  x: 1400.0
+  y: 600.0
   z: 0.0
 - meta: {}
   pointer_type: Plant
@@ -129,5 +93,41 @@
   radius: 25.0
   depth: 0
   x: 200.0
-  y: 1100.0
+  y: 1000.0
+  z: 0.0
+- meta: {}
+  pointer_type: Plant
+  name: Beets
+  openfarm_slug: beet
+  plant_stage: planned
+  planted_at:
+  pullout_direction: 0
+  radius: 25.0
+  depth: 0
+  x: 600.0
+  y: 1000.0
+  z: 0.0
+- meta: {}
+  pointer_type: Plant
+  name: Beets
+  openfarm_slug: beet
+  plant_stage: planned
+  planted_at:
+  pullout_direction: 0
+  radius: 25.0
+  depth: 0
+  x: 1000.0
+  y: 1000.0
+  z: 0.0
+- meta: {}
+  pointer_type: Plant
+  name: Beets
+  openfarm_slug: beet
+  plant_stage: planned
+  planted_at:
+  pullout_direction: 0
+  radius: 25.0
+  depth: 0
+  x: 1400.0
+  y: 1000.0
   z: 0.0

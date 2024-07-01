@@ -48,6 +48,7 @@ import { SequenceVisualization } from "./sequence_visualization";
 import { chooseProfile, ProfileLine } from "./profile";
 import { betterCompact } from "../../util";
 import { Path } from "../../internal_urls";
+import { weedPointersDemo } from "../../photos/weed_detector/actions";
 
 const BOUND_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
 
@@ -586,7 +587,8 @@ export class GardenMap extends
     boxSelected={this.props.designer.selectedPoints}
     groupSelected={this.groupSelected}
     interactions={this.interactions("Weed")}
-    weeds={this.props.weeds}
+    weeds={weedPointersDemo}
+
     animate={this.animate} />;
   PlantLayer = () => <PlantLayer
     mapTransformProps={this.mapTransformProps}

@@ -35,6 +35,9 @@ import { createGroup } from "../point_groups/actions";
 import { GroupInventoryItem } from "../point_groups/group_inventory_item";
 import { push } from "../history";
 import { Path } from "../internal_urls";
+import { weedPointersDemo } from "../photos/weed_detector/actions";
+import { forceOnline } from "../devices/must_be_online";
+import { info } from "../toast/toast";
 
 export interface WeedsProps {
   weeds: TaggedWeedPointer[];
@@ -46,12 +49,18 @@ export interface WeedsProps {
   weedsPanelState: WeedsPanelState;
 }
 
+const maybeNoop = () =>
+	forceOnline() &&
+	info(t("HarvestX"), {
+		title: t("HarvestX")
+	});
+
 interface WeedsState extends SortOptions {
   searchTerm: string;
 }
 
 export const mapStateToProps = (props: Everything): WeedsProps => ({
-  weeds: selectAllWeedPointers(props.resources.index),
+  weeds: forceOnline() ? selectAllWeedPointers(props.resources.index).concat(weedPointersDemo) : selectAllWeedPointers(props.resources.index),
   dispatch: props.dispatch,
   hoveredPoint: props.resources.consumers.farm_designer.hoveredPoint,
   getConfigValue: getWebAppConfigValue(() => props),
@@ -88,6 +97,7 @@ export const WeedsSection = (props: WeedsSectionProps) => {
       {props.category == "pending" && props.items.length > 0 && props.open &&
         <div className={"approval-buttons"}>
           <button className={"fb-button green"} onClick={e => {
+            maybeNoop();
             e.stopPropagation();
             props.items.map(weed => {
               props.dispatch(edit(weed, { plant_stage: "active" }));
@@ -97,6 +107,7 @@ export const WeedsSection = (props: WeedsSectionProps) => {
             <i className={"fa fa-check"} />{t("all")}
           </button>
           <button className={"fb-button red"} onClick={e => {
+            maybeNoop();
             e.stopPropagation();
             props.items.map(weed => props.dispatch(destroy(weed.uuid, true)));
           }}>
@@ -125,7 +136,7 @@ export const WeedsSection = (props: WeedsSectionProps) => {
       </EmptyStateWrapper>}
       {props.items.length == 0 && !noWeeds &&
         <p className={"no-weeds"}>{t(props.emptyStateText)}</p>}
-      {props.items.map(p => <WeedInventoryItem
+      {props.items.map(p => <WeedInventoryItem // important
         key={p.uuid}
         tpp={p}
         maxSize={maxSize}

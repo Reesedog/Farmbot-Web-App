@@ -28,6 +28,11 @@ import {
 import {
   GoToThisLocationButton, validGoButtonAxes,
 } from "../../farm_designer/move_to";
+import { forceOnline } from "../../devices/must_be_online";
+import { 
+	demoTakePhoto, demoDeletePhoto, demoToggleRotation, currentRotation, demoCurrentImage, 
+	demoToggleCrop, demoRenderLabel, demoGetImageIndex, isComparing, demoCompare, compareList, setCurrentImage
+} from "../../demo/demo_support_framework/supports";
 
 const NewPhotoButtons = (props: NewPhotoButtonsProps) => {
   const imageUploadJobProgress = downloadProgress(props.imageJobs[0]);
@@ -45,6 +50,16 @@ const NewPhotoButtons = (props: NewPhotoButtonsProps) => {
         onClick={camDisabled.click || props.takePhoto}>
         {t("Take Photo")}
       </button>
+			{forceOnline() 
+			 ? <button
+			      className={isComparing 
+							? `fb-button red ${camDisabled.class}`
+							: `fb-button green ${camDisabled.class}`}
+			      title={camDisabled.title}
+			      onClick={camDisabled.click || props.compare}>
+			      {isComparing ? t("Comparing") : t("Compare")}
+		    </button>
+			 : undefined }
     </MustBeOnline>
     <p>
       {imageUploadJobProgress &&
@@ -173,7 +188,8 @@ export class Photos extends React.Component<PhotosProps, PhotosComponentState> {
       getConfigValue={this.props.getConfigValue}
       env={this.props.env}
       crop={this.state.crop}
-      images={this.props.images} />;
+      images={this.props.images} 
+			rotation={forceOnline() ? currentRotation : undefined}/>;
 
   get highestIndex() { return this.props.images.length - 1; }
 
@@ -196,7 +212,10 @@ export class Photos extends React.Component<PhotosProps, PhotosComponentState> {
       <NewPhotoButtons
         syncStatus={this.props.syncStatus}
         botToMqttStatus={this.props.botToMqttStatus}
-        takePhoto={takePhoto}
+        takePhoto={() => forceOnline() 
+					? demoTakePhoto()
+					: takePhoto}
+				compare={() => demoCompare()}
         env={this.props.env}
         imageJobs={this.props.imageJobs} />
       <Overlay isOpen={this.state.fullscreen}
@@ -206,7 +225,7 @@ export class Photos extends React.Component<PhotosProps, PhotosComponentState> {
       </Overlay>
       <this.ImageFlipper id={"panel-flipper"} />
       <PhotoFooter
-        image={this.props.currentImage}
+        image={forceOnline() ? demoCurrentImage : this.props.currentImage}
         botOnline={isBotOnline(this.props.syncStatus, this.props.botToMqttStatus)}
         dispatch={this.props.dispatch}
         arduinoBusy={this.props.arduinoBusy}
@@ -215,19 +234,40 @@ export class Photos extends React.Component<PhotosProps, PhotosComponentState> {
         movementState={this.props.movementState}
         timeSettings={this.props.timeSettings}>
         <PhotoButtons
-          deletePhoto={this.deletePhoto}
-          toggleCrop={this.toggleCrop}
-          toggleRotation={this.toggleRotation}
+          deletePhoto={() => forceOnline() 
+						? demoDeletePhoto()
+						: this.deletePhoto}
+          toggleCrop={() => forceOnline()
+						? demoToggleCrop()
+						: this.toggleCrop}
+          toggleRotation={() => forceOnline() 
+						? demoToggleRotation()
+						: this.toggleRotation}
           toggleFullscreen={this.toggleFullscreen}
-          imageUrl={this.props.currentImage?.body.attachment_url}
-          image={this.props.currentImage}
+          imageUrl={forceOnline() 
+						? demoCurrentImage?.body.attachment_url
+						: this.props.currentImage?.body.attachment_url}
+          image={forceOnline() ? demoCurrentImage : this.props.currentImage}
           flags={this.props.flags}
           size={this.props.currentImageSize}
           dispatch={this.props.dispatch}
           canTransform={this.canTransform}
           canCrop={this.canCrop} />
       </PhotoFooter>
-      {this.props.images.length > 1 &&
+      {forceOnline() && isComparing
+			  ? compareList.length > 1 && 
+			  <MarkedSlider 
+				  min={0}
+					max={compareList.length-1}
+					labelStepSize={1} 
+					labelRenderer={demoRenderLabel}
+					value={demoGetImageIndex(demoCurrentImage)}
+					onChange={index => 
+						{index = compareList.length - 1 - index; 
+						  setCurrentImage(compareList[index])}}
+					items={compareList}
+					itemValue={demoGetImageIndex} />
+				: this.props.images.length > 1 &&
         <MarkedSlider
           min={0}
           max={this.highestIndex}

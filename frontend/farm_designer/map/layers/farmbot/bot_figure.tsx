@@ -15,6 +15,7 @@ import {
   mapImagePositionData, cropAmount, largeCrop, MapImagePositionData,
   rotated90degrees,
 } from "../images/map_image";
+import { forceOnline } from "../../../../devices/must_be_online";
 
 export interface BotFigureProps {
   figureName: string;
@@ -86,27 +87,42 @@ export class BotFigure extends
         opacity={0.8}
         fill={"none"} />
     </g>;
-
-  UTM = () =>
-    !this.props.mountedToolInfo?.noUTM
-      ? <circle id="UTM"
+    
+  UTM = () =>{
+    if(!this.props.mountedToolInfo&&!this.props.mountedToolInfo.noUTM){
+      return (<circle id="UTM"
         cx={this.positionQ.qx}
         cy={this.positionQ.qy}
         r={35}
         fillOpacity={this.opacity}
-        fill={this.color} />
-      : <ThreeInOneToolHead
+        fill={this.color} />);}
+    if(forceOnline()){
+      // use a green colour
+      return(<ThreeInOneToolHead
         x={this.positionQ.qx}
         y={this.positionQ.qy}
         toolTransformProps={this.props.mapTransformProps}
         pulloutDirection={ToolPulloutDirection.POSITIVE_X}
-        color={this.color} />;
+        color={"#00FF15"} />);
+
+    }
+    return(<ThreeInOneToolHead
+        x={this.positionQ.qx}
+        y={this.positionQ.qy}
+        toolTransformProps={this.props.mapTransformProps}
+        pulloutDirection={ToolPulloutDirection.POSITIVE_X}
+        color={this.color} />);}
 
   render() {
     const { figureName, position, plantAreaOffset, mapTransformProps,
     } = this.props;
     const { xySwap } = mapTransformProps;
     const mapSize = getMapSize(mapTransformProps, plantAreaOffset);
+    var color = this.color;
+    // use customized color in demo
+    if(forceOnline()){
+      color = Color.lightGreen;
+    }
     return <g id={figureName}>
       <rect id="gantry"
         x={xySwap ? -plantAreaOffset.x : this.positionQ.qx - 10}
@@ -114,12 +130,12 @@ export class BotFigure extends
         width={xySwap ? mapSize.w : 20}
         height={xySwap ? 20 : mapSize.h}
         fillOpacity={this.opacity}
-        fill={this.color} />
+        fill={color} />
       <g id="UTM-wrapper" style={{ pointerEvents: "all" }}
         onMouseOver={() => this.setHover(true)}
         onMouseLeave={() => this.setHover(false)}
         fillOpacity={this.opacity}
-        fill={this.color}>
+        fill={color}>
         {this.props.mountedToolInfo?.name
           ? <this.MountedTool toolName={this.props.mountedToolInfo.name} />
           : <this.UTM />}

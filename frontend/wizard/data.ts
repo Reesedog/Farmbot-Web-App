@@ -104,6 +104,11 @@ export enum WizardStepSlug {
   language = "language",
   orderInfo = "orderInfo",
   model = "model",
+  farmbot_models = "farmbot_models",
+  genesis = "genesis",
+  express = "express",
+  custom = "custom",
+  recodmendation = "recodmendation",
   rpi = "rpi",
   downloadOs = "downloadOs",
   downloadImager = "downloadImager",
@@ -229,8 +234,53 @@ export const WIZARD_STEPS = (props: WizardStepDataProps): WizardSteps => {
     },
     {
       section: WizardSectionSlug.intro,
+      slug: WizardStepSlug.farmbot_models,
+      title: t("Our current Farmbot models"),
+      content: t("FarmBot offers four distinct models, each designed to meet specific agricultural needs. Genesis, Genesis XL, Express, Express XL, custom bot. These models cover a wide range of gardening requirements and budgets."),
+      question: t("Continue?"),
+      outcomes: [],
+    }
+    ,
+    {
+      section: WizardSectionSlug.intro,
+      slug: WizardStepSlug.genesis,
+      title: t("Genesis Model"),
+      content: t("Genesis: The Genesis is the flagship FarmBot model, designed for precision and flexibility.\nFeatures:\nModular design for easy customization and expansion\nPowerful stepper motors and precision lead screw for accurate movement\nCustomizable toolbay with interchangeable tools for seeding, watering, weeding, and more\nIntegrated soil moisture sensor\nCompatible with a wide range of third-party sensors and actuators\nGenesis XL: The Genesis XL is a larger version of the Genesis, with a wider gantry and longer track length. This makes it ideal for larger farms and gardens.\nFeatures:\nAll the features of the Genesis, plus:\nLarger planting area\nAbility to support more tools and sensors"),
+      question: t("Continue?"),
+      outcomes: [],
+    }
+    ,
+    {
+      section: WizardSectionSlug.intro,
+      slug: WizardStepSlug.express,
+      title: t("Express Model"),
+      content: t("Express: The Express is a smaller and more affordable FarmBot model, designed for beginners and hobbyists.\nFeatures:\nPre-assembled for easy setup\nFixed toolbay with the most essential tools for seeding, watering, and weeding\nCompatible with a subset of third-party sensors and actuators\nExpress XL:The Express XL is a larger version of the Express, with a wider gantry and longer track length. This makes it ideal for larger gardens and small farms\nFeatures:\nAll the features of the Express, plus:\nLarger planting area"),
+      question: t("Continue?"),
+      outcomes: [],
+    }
+    ,
+    {
+      section: WizardSectionSlug.intro,
+      slug: WizardStepSlug.custom,
+      title: t("Custom Model"),
+      content: t("Custom Bot: The Custom Bot option is for users who want to build their own FarmBot from scratch. This gives you complete control over the design and features of your bot.\nFeatures:\nAccess to all the FarmBot design files and documentation\nSupport from the FarmBot community"),
+      question: t("Continue?"),
+      outcomes: [],
+    }
+    ,
+    {
+      section: WizardSectionSlug.intro,
+      slug: WizardStepSlug.recodmendation,
+      title: t("Which FarmBot model is right for you?"),
+      content: t("The best FarmBot model for you will depend on your specific needs and budget. If you are looking for the most powerful and flexible FarmBot, the Genesis is the best option. If you are on a tighter budget or are new to FarmBot, the Express is a good choice. And if you want to build your own FarmBot from scratch, the Custom Bot option is for you."),
+      question: t("Continue?"),
+      outcomes: [],
+    }
+    ,
+    {
+      section: WizardSectionSlug.intro,
       slug: WizardStepSlug.model,
-      title: t("FarmBot model"),
+      title: t("Select FarmBot model"),
       content: t("Select your FarmBot model."),
       component: FirmwareHardwareSelection,
       question: t("Have you selected your FarmBot model?"),

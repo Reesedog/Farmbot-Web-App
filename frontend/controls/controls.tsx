@@ -22,6 +22,7 @@ import { ResourceIndex, UUID } from "../resources/interfaces";
 import { t } from "../i18next_wrapper";
 import { push } from "../history";
 import { Path } from "../internal_urls";
+import { maybePopupAd } from "../demo/demo_support_framework/supports";
 
 export class RawDesignerControls
   extends React.Component<DesignerControlsProps, {}> {
@@ -58,11 +59,14 @@ export interface ControlsPanelProps {
 
 export class ControlsPanel extends React.Component<ControlsPanelProps> {
 
-  setPanelState = (key: keyof ControlsState) => () =>
+  
+  setPanelState = (key: keyof ControlsState) => () =>{
+    maybePopupAd();
     this.props.dispatch({
       type: Actions.SET_CONTROLS_PANEL_OPTION,
       payload: key,
     });
+  };
 
   Move = () => {
     return <div className={"move-tab"}>

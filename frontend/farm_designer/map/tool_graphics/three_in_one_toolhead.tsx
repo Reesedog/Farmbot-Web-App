@@ -6,6 +6,7 @@ export const ThreeInOneToolHead = (props: ThreeInOneToolHeadProps) => {
   const { pulloutDirection } = props;
   const { quadrant, xySwap } = props.toolTransformProps;
   const angle = toolbaySlotAngle(pulloutDirection, quadrant, xySwap);
+  var color = props.color;
   return <g id="three-in-one-tool-head">
     <defs id="tool-head-defs">
       <g id="unrotated-tool-head">
@@ -14,24 +15,24 @@ export const ThreeInOneToolHead = (props: ThreeInOneToolHeadProps) => {
           cy={props.y}
           r={25}
           fillOpacity={0.5}
-          fill={props.color} />
+          fill={color} />
         <circle
           cx={props.x}
           cy={props.y + 10}
           r={8}
-          fill={props.color}
+          fill={color}
           fillOpacity={0.25} />
         <circle
           cx={props.x}
           cy={props.y - 10}
           r={5}
-          fill={props.color}
+          fill={color}
           fillOpacity={0.25} />
         <circle
           cx={props.x}
           cy={props.y - 10}
           r={2}
-          fill={props.color}
+          fill={color}
           fillOpacity={0.3} />
       </g>
     </defs>

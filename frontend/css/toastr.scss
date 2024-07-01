@@ -8,6 +8,29 @@
   flex-direction: column-reverse;
 }
 
+// a container that displays the popup in the middle
+.ad-container {
+  justify-content: center; 
+  align-items: center; 
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); 
+  display: flex;
+  position: fixed;
+  bottom: 0px;
+  z-index: 999999;
+  width: 100%;
+  pointer-events: none;
+  flex-direction: column-reverse;
+}
+
+// restrict image size
+.toast-image img {
+  max-width: 100%; 
+  height: auto;
+}
+
+
 .toast {
   position: relative;
   width: 100%;

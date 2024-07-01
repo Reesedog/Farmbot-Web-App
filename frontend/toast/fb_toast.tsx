@@ -44,9 +44,18 @@ export class Toast extends React.Component<ToastProps, ToastState> {
     if (this.props.noDismiss) { return; }
     this.setState({ dismissed: true });
     this.detach();
+    // if in demo interface it would create ads
+    if(this.props.isAd){
+      this.displayAd();
+    }
+  };
+  // dismiss the popup and navigate the shop
+  displayAd = () => {
+    window.open("https://farm.bot", '_blank');
   };
 
   render() {
+    const {url} = this.props;
     const { color } = this.props;
     const style = {
       animationPlayState: this.state.isHovered ? "paused" : "running",
@@ -59,6 +68,33 @@ export class Toast extends React.Component<ToastProps, ToastState> {
       this.state.dismissed ? "poof" : "",
       this.state.detached ? "gone" : "",
     ];
+    // if we display add, attack a photo in middle of toast
+    if(this.props.isAd){
+      return <div
+      className={classNames.join(" ")}
+      id={this.props.id}
+      onClick={this.dismiss}
+      onMouseEnter={() => this.setState({ isHovered: true })}
+      onMouseLeave={() => this.setState({ isHovered: false })}>
+      <h4 className={"toast-title"}>{this.props.title}</h4>
+      {url && (
+          <div className={"toast-image"}>
+            <img src={url} alt="Toast Image" />
+          </div>
+      )}
+      <div className={"toast-message"}>
+        <Markdown>
+          {this.props.message.replace(/\s+/g, " ")}
+        </Markdown>
+      </div>
+      <div className={"toast-loader"}>
+        <div className={`toast-loader-left ${color}`} style={style}></div>
+        <div className={"toast-loader-right"} style={style}></div>
+        <div className={"toast-loader-spinner"} style={style}></div>
+      </div>
+    </div>;
+
+    }
     return <div
       className={classNames.join(" ")}
       id={this.props.id}
@@ -87,8 +123,21 @@ export const ToastContainer = () =>
       dispatch={store.dispatch} />
   </div>;
 
+export const AdContainer = () =>
+  <div className={"ad-container"}>
+    <Toasts
+      toastMessages={store.getState().app.ads}
+      dispatch={store.dispatch} />
+  </div>;
+
 export const Toasts = (props: ToastsProps) =>
   <div className={"toasts"}>
     {Object.values(props.toastMessages).map(toastProps =>
       <Toast key={toastProps.id} dispatch={props.dispatch} {...toastProps} />)}
+  </div>;
+
+export const Ads = (props: ToastsProps) =>
+  <div className={"ads"}>
+    {Object.values(props.toastMessages).map(adProps =>
+      <Toast key={adProps.id} dispatch={props.dispatch} {...adProps} />)}
   </div>;

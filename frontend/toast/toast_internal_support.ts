@@ -17,3 +17,22 @@ export const createToastOnce = (props: CreateToastOnceProps) => {
     }));
   }
 };
+
+export const createAdOnce = (props: CreateToastOnceProps) => {
+  // create an add in centre of screen
+  const { message, fallbackLogger } = props;
+  if (Object.values(store.getState().app.ads)
+    .filter(ad => ad.message == message).length > 0) {
+    (fallbackLogger || console.log)(message);
+  } else {
+    setTimeout(() => store.dispatch({
+      type: Actions.CREATE_AD, payload: {
+        ...props,
+        id: `${props.idPrefix}-ad-${uuid()}`
+      }
+    }));
+  }
+};
+
+
+

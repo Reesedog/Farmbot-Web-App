@@ -31,3 +31,7 @@ tmp
 # === Legacy
 # v13 upgrade creates a DB backup as dump.sql:
 dump.sql
+
+# farmbot by harvestX
+Gemfile
+passenger.3000.pid

@@ -1,68 +1,99 @@
-# FarmBot Web App
+# FarmBot Web App Demo extensions by HarvestX
 
-[![codebeat badge](https://codebeat.co/badges/7f81859b-67fe-4bdb-b56f-050bfed35e9c)](https://codebeat.co/projects/github-com-farmbot-farmbot-web-app-staging)
-[![codecov](https://codecov.io/gh/FarmBot/Farmbot-Web-App/branch/main/graph/badge.svg)](https://codecov.io/gh/FarmBot/Farmbot-Web-App)
-[![Coverage Status](https://coveralls.io/repos/github/FarmBot/Farmbot-Web-App/badge.svg)](https://coveralls.io/github/FarmBot/Farmbot-Web-App)
-[![Maintainability](https://api.codeclimate.com/v1/badges/74091163d8a02bb8988f/maintainability)](https://codeclimate.com/github/FarmBot/Farmbot-Web-App/maintainability)
+## Project Background
 
-This codebase contains FarmBot's web based user interface, a RESTful JSON API, and a Dockerized MQTT server. The API stores data such as user account information, farm designs, sequences, authorization tokens, and a variety of other resources. The MQTT server facilitates realtime messaging from the browser to the device.
+### Introduction to FarmBot:
 
-## I own a FarmBot, do I need this?
+FarmBot is an ultimate solution for general household who wants to learn how to or has an interest in planting vegetables or crops within their own backyard. It is an interactive robotics that can help you to look after and take care of your plants. For example, it will monitor your garden based on water level, soil conditions etc… and water the plants or remove weeds automatically according to the user’s own settings. 
 
-**No. If you are an owner of a FarmBot kit, you do not need to download or self-host this software.** [FarmBot Inc](https://farm.bot) provides a free-to-use instance of the web app at [my.farm.bot](https://my.farm.bot/) which we recommend to all FarmBot owners. Get started with [these instructions](https://software.farm.bot/docs/getting-started).
+### The existing solution:
 
-# Self hosting
+There are a lot of functions that are already built-in available using the FarmBot app graphically. For example,  FarmBot users are able to design their own garden’s layout. What’s more, the users are able to control their devices remotely via the web app. The app has a high degree of freedom for users to set order of executables without restrictions, more importantly, without coding manually.
 
-Hosting your own server requires an understanding of how Ruby on Rails applications (and databases) operate. Self-hosting the web app will not provide you with a more stable user experience and may result in accidental security issues or data loss. There are only a handful of use cases where running a third party server may be necessary:
+## Demo
 
- * Development of new features, bug fixes, and pull requests.
- * Independent security research and auditing.
+[Demo running on Google Cloud](http://34.125.233.194:3000/demo)
 
-:warning: If you are not a Ruby on Rails developer or you have never written a Ruby on Rails application, please use [my.farm.bot](https://my.farm.bot/) instead of trying to self host. *Running a server is a non-trivial task that may require hundreds of hours of setup and maintenance time.* Data loss and security issues are possible in some circumstances. Self hosting requires an intermediate background (3 to 5 years experience) in Ruby, SQL and Linux system administration.
+In order to meet the performance measure, we  have optimised our virtual machine, setting the CPU to be 8-core with 16GB RAM. We are using GCP to host our application since this is an extension on an open-sourced project that is available to be merged into the original branch.
 
-:no_entry: **Technical support for self hosting is beyond the scope of the basic technical support that FarmBot Inc provides with each FarmBot kit. If you or your organization pursue self hosting, you will need to operate your server independently of FarmBot Inc technical support. We do not have the resources available to help novice developers learn to setup servers, environments, configurations, or perform basic Linux command line instructions.**
+## Description of Key Algorithms / Framework
 
-## Local setup
+The key algorithms are developed under frontend/demo/demo_support_framework. The demo_ads.ts and demo_photos.ts are constants involving ad features and photos that supporting images and photos tab under the demo interface.
 
-We recommend all self hosted installations be installed on a fresh Ubuntu server using the instructions provided in [ubuntu_example.sh](https://github.com/FarmBot/Farmbot-Web-App/blob/main/ubuntu_example.sh). These instructions are regularly checked and updated to ensure they work. **At this time we cannot provide assistance for running the web app in different environments.**
+The supports.ts file involves portion of the key algorithms and units that modifies the existing solution. Including functions of taking photos under a simulated environment and update the regarding image on map, the brand new photo comparison feature where the users can compare the new photos with existing ones, visiting the growing history of a plant. It also contains the advertisement feature, where it pops up and rotate through various different advertisement. 
 
-If you raise an issue indicating that you haven't followed the setup instructions, looked through past issues, or done a cursory internet search for basic help, expect the issue to be closed and we'll point you to the setup instructions. *Again, if you do not have at least intermediate Linux and Ruby experience, please use [my.farm.bot](https://my.farm.bot).* Running a self-hosted server is not easy!
+There are also new demo features modifying the existing solution that is built into the actions.ts file, where we have modified functions sending the action towards the supports.ts framework and modify the variables instead of sending a remote control process to an actual FarmBot device.
 
-## Configuration settings (important)
+### extensions
 
-**Your server won't run without setting ENV variables first**. Set the ENV variables directly from your shell / server management tool or by writing a `.env` file in the server's base directory. See [example.env](https://github.com/FarmBot/Farmbot-Web-App/blob/main/example.env) for a list of all the variables that must be set.
+The presense of demo support framework effctively provides a connection for the developers to continuously implement new features for the demo interface without interrupting with the existing framework of controlling FarmBot devices under a normal account. New developers should implement new variable or simulations within this framework, modifying other related parts and directly invoke the variables from this demo support framework.
 
-Encryption keys will be auto-generated if not present. They can be reset using `rake keys:generate`. If `ENV['RSA_KEY']` is set, it will be used in place of the `*.pem` files. This is useful for environments like Heroku and Docker, where file system access is not allowed.
+## Features
 
-## Updates
+See [User Story](https://github.com/Reesedog/Farmbot-Web-App/blob/dev/docs/HarvestX-User%20Story-151023-093741.pdf)
 
-We update `main` roughly every 2 to 4 weeks. If you self host the application you will need to manually update the software to get the latest updates. Technical support for self hosting is beyond the scope of the basic technical support that we provide with each FarmBot kit.
+and [releases](https://github.com/Reesedog/Farmbot-Web-App/releases)
 
-## Example API requests
+## Documents
 
-See our documentation for a list of [example API requests and responses](https://developer.farm.bot/docs/api-docs). If you wish to write an add-on application that uses the FarmBot API, please let us know in an issue. We are happy to answer any specific questions you may have.
+Checkout docs/ folder
 
-# Contributing
+* User Stories
+* Motivational Model
+* Non-functional Requirements
+* Architecture descriptions and diagrams
 
-There are many ways in which you can contribute to the FarmBot web app:
+And tests/ folder
+* Test cases
 
-:pencil: Browse the [open issues](https://github.com/FarmBot/Farmbot-Web-App/issues) and make thoughtful suggestions or just let us know if something is particularly important to you.
+## Installisation Guide
 
-:books: Check out our [developer documentation](https://developer.farm.bot/) for writing add-ons and plugins for FarmBot.
+see [Deployment Guide](https://github.com/Reesedog/Farmbot-Web-App/blob/dev/docs/HarvestX-Deployment%20Guide-151023-095140.pdf)
 
-:mag: Search the repository for [TODOs](https://github.com/FarmBot/Farmbot-Web-App/search?utf8=%E2%9C%93&q=todo). Sometimes these are simple tasks suitable for new contributors.
+## Changelog
 
-:globe_with_meridians: Help [translate the web app](#translating-the-web-app) into your language! There are FarmBot owners in over 90 countries who speak a wide range of primary languages.
+see [Releases](https://github.com/Reesedog/Farmbot-Web-App/releases)
 
-:lock: [Responsibly disclose a security vulnerability](http://disclosure.farm.bot/). We take security seriously and value the input of independent researchers.
+and [Change log](https://github.com/Reesedog/Farmbot-Web-App/blob/dev/docs/HarvestX-Changelog-111123-093205.pdf)
 
-:bulb: [Open an issue](https://github.com/FarmBot/Farmbot-Web-App/issues/new) to report a non-security related problem or propose a new feature or improvement idea.
+## Traceability Matrix for testing
 
-## Translating the web app
+see [tests matrix](https://github.com/Reesedog/Farmbot-Web-App/blob/dev/tests/HarvestX-Testing-201023-091017.pdf)
 
-Thanks for your interest in internationalizing the FarmBot web app! To add translations:
+The test cases are within the frontend/ under folder each relevant functions 
+The newly added / modified cases are
+* frontend/demo/__tests__/demo_iframe_test.tsx
+* frontend/photos/__tests__/photos_test.tsx
+* frontend/settings/fbos_settings/__tests__/ota_time_selector_test.tsx
+* frontend/devices/__tests__/actions_test.ts
 
-1. Fork this repo
-0. Navigate to `/public/app-resources/languages` and run the command `node _helper.js yy` where `yy` is your language's [language code](http://www.science.co.il/Language/Locale-codes.php). Eg: `ru` for Russian.
-0. Edit the translations in the file created in the previous step: `"phrase": "translated phrase"`.
-0. When you have updated or added new translations, commit/push your changes and submit a pull request.
+We have also run other existing test cases for purpose of integration testing
+
+
+## Deployment
+**Setting Up GCP VM**
+
+1. Navigate to **Compute Engine** in the Google Cloud Platform (GCP) console.
+2. Start a new VM instance.
+3. For the machine type, select the E2 series and choose `e2-standard-4`.
+4. Select Ubuntu as the operating system.
+5. In the firewall settings, check the options to allow both HTTP and HTTPS traffic.
+6. On your local device, generate an SSH key using the command: 
+   `ssh-keygen -t rsa -b 4096 -C "your_email@example.com"`
+7. In the VM instance settings, go to the "Advanced" options, then to the "Security" section.
+8. Add your SSH public key in the provided field.
+
+**Deploying Server**
+
+1. SSH into your GCP Virtual Machine Instance using the SSH key you generated.
+2. Follow the `ubuntu_example.sh` script for setting up the application environment.
+3. Execute the script and follow the guide provided within to install all necessary dependencies up to the point where you use `nano`.
+4. Update the `.env` file with parameters shared in your Slack workspace.
+5. Continue with the installation guide provided. If you encounter any warnings regarding PunyCode, you may ignore them.
+6. After completing the setup, wait for a notification indicating the build process is complete.
+7. Access your deployed application by visiting `http://<your_vm_ip_address>:3000` in your web browser.
+
+
+
+
+

@@ -11,6 +11,8 @@ import { mapPointClickAction, selectPoint } from "../farm_designer/map/actions";
 import { round } from "lodash";
 import { edit, save, destroy } from "../api/crud";
 import { FilePath, Path } from "../internal_urls";
+import { forceOnline } from "../devices/must_be_online";
+import { info } from "../toast/toast";
 
 export interface WeedInventoryItemProps {
   tpp: TaggedWeedPointer;
@@ -19,6 +21,12 @@ export interface WeedInventoryItemProps {
   pending?: boolean;
   maxSize?: number;
 }
+
+const maybeNoop = () =>
+	forceOnline() &&
+	info(t("HarvestX"), {
+		title: t("HarvestX")
+	});
 
 export class WeedInventoryItem extends
   React.Component<WeedInventoryItemProps, {}> {
@@ -40,6 +48,8 @@ export class WeedInventoryItem extends
     };
 
     const click = () => {
+      maybeNoop();
+      if (this.props.pending) return;
       if (getMode() == Mode.boxSelect) {
         mapPointClickAction(dispatch, tpp.uuid)();
         toggle("leave");
@@ -72,6 +82,7 @@ export class WeedInventoryItem extends
       </span>
       {this.props.pending &&
         <button className={"fb-button green"} onClick={e => {
+          maybeNoop();
           e.stopPropagation();
           this.props.dispatch(edit(tpp, { plant_stage: "active" }));
           this.props.dispatch(save(tpp.uuid));
@@ -80,6 +91,7 @@ export class WeedInventoryItem extends
         </button>}
       {this.props.pending &&
         <button className={"fb-button red"} onClick={e => {
+          maybeNoop();
           e.stopPropagation();
           this.props.dispatch(destroy(tpp.uuid, true));
         }}>

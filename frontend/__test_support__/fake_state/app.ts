@@ -23,6 +23,7 @@ export const app: AppState = {
   sequencesPanelState: sequencesPanelState(),
   metricPanelState: metricPanelState(),
   toasts: {},
+  ads: {},
   movement: fakeMovementState(),
   controls: controlsState(),
   jobs: jobsState(),

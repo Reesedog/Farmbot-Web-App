@@ -198,6 +198,7 @@ export interface MapImageProps {
   mapTransformProps: MapTransformProps;
   callback?: (img: HTMLImageElement) => void;
   disableTranslation?: boolean;
+	ratation?: number | undefined; 
 }
 
 interface MapImageState {
@@ -253,7 +254,7 @@ export class MapImage extends React.Component<MapImageProps, MapImageState> {
         if (imagePosition) {
           const { width, height, transformOrigin } = imagePosition;
           const transform = this.props.disableTranslation ?
-            imagePosition.transform.replace(/translate\(.*?\)/g, "")
+            imagePosition.transform.replace(/translate\(.*?\)/g, "") + ` rotate(${this.props.ratation || 0}deg)`
             : imagePosition.transform;
           const hovered = this.props.hoveredMapImage == image.body.id;
           const clipName = cropPathName(cropImage, imageRotation, image.body.id);

@@ -7,6 +7,8 @@ import { sortedFeeds } from "./edit";
 import { t } from "../../i18next_wrapper";
 import { WebcamImg } from "./webcam_img";
 import { Help } from "../../ui";
+import { demoWebcamFeed } from "../../demo/demo_support_framework/supports";
+import { forceOnline } from "../../devices/must_be_online";
 
 type State = {
   /** Current index in the webcam feed list.
@@ -51,6 +53,10 @@ export class Show extends React.Component<WebcamPanelProps, State> {
   render() {
     const { props } = this;
     const feeds = sortedFeeds(this.props.feeds).map(x => x.body);
+
+    // If user is using demo account, show placeholder webcam video.
+    if (forceOnline()) feeds.unshift(demoWebcamFeed.body);
+    
     const flipper = new Flipper(feeds, FALLBACK_FEED, this.state.current);
     const msg = this.getMessage(flipper.current.url);
     const imageClass = msg.length > 0 ? "no-flipper-image-container" : "";

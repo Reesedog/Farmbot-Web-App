@@ -8,9 +8,11 @@ import { FlipperImage } from "./flipper_image";
 import { selectImage, setShownMapImages } from "./actions";
 import { TaggedImage } from "farmbot";
 import { UUID } from "../../resources/interfaces";
+import { demoImages, demoCurrentImage, setCurrentImage, checkUpdate, compareList, isComparing, prevI, setPrevI } from "../../demo/demo_support_framework/supports";
 
 export const PLACEHOLDER_FARMBOT = "/placeholder_farmbot.jpg";
 export const PLACEHOLDER_FARMBOT_DARK = "/placeholder_farmbot_dark.jpg";
+import { forceOnline } from "../../devices/must_be_online";
 
 export const getIndexOfUuid = (images: TaggedImage[], uuid: UUID | undefined) =>
   uuid ? images.map(x => x.uuid).indexOf(uuid) : 0;
@@ -44,7 +46,7 @@ export const PlaceholderImg = (props: PlaceholderImgProps) =>
 
 export class ImageFlipper extends
   React.Component<ImageFlipperProps, ImageFlipperState> {
-  state: ImageFlipperState = { disableNext: true, disablePrev: false };
+  state: ImageFlipperState = { disableNext: false, disablePrev: true };
 
   onImageLoad = (img: HTMLImageElement) => {
     this.props.dispatch({
@@ -56,26 +58,54 @@ export class ImageFlipper extends
   get uuids() { return this.props.images.map(x => x.uuid); }
 
   go = (increment: -1 | 1) => () => {
-    const currentImageUuid = this.props.currentImage?.uuid;
-    const { nextIndex, indexAfterNext } =
+		if (forceOnline() && demoCurrentImage) {
+			const images = isComparing ? compareList : demoImages; 
+			const currentImage = demoCurrentImage; 
+      const nextIndex = images.indexOf(currentImage) + increment; 
+	    const indexAfterNext = images.indexOf(currentImage) + 2 * increment; 
+	    const tooHigh = (index: number): boolean => index > images.length - 1;
+      const tooLow = (index: number): boolean => index < 0;
+
+	    if (!tooHigh(nextIndex) && !tooLow(nextIndex)) {
+				setCurrentImage(images[nextIndex]); 
+		    this.setState({
+			    disableNext: tooHigh(indexAfterNext),
+			    disablePrev: tooLow(indexAfterNext),
+		    });
+	    } 
+    } else {
+	    const currentImageUuid = this.props.currentImage?.uuid;
+      const { nextIndex, indexAfterNext } =
       getNextIndexes(this.props.images, currentImageUuid, increment);
-    const tooHigh = (index: number): boolean => index > this.uuids.length - 1;
-    const tooLow = (index: number): boolean => index < 0;
-    if (!tooHigh(nextIndex) && !tooLow(nextIndex)) {
-      this.props.flipActionOverride
+      const tooHigh = (index: number): boolean => index > this.uuids.length - 1;
+      const tooLow = (index: number): boolean => index < 0;
+      if (!tooHigh(nextIndex) && !tooLow(nextIndex)) {
+        this.props.flipActionOverride
         ? this.props.flipActionOverride(nextIndex)
         : this.props.dispatch(selectNextImage(this.props.images, nextIndex));
-    }
-    this.setState({
-      disableNext: tooLow(indexAfterNext),
-      disablePrev: tooHigh(indexAfterNext),
-    });
+      }
+      this.setState({
+        disableNext: tooLow(indexAfterNext),
+        disablePrev: tooHigh(indexAfterNext),
+      });
+	  }
   };
 
   render() {
-    const { images, currentImage } = this.props;
+	  var { images, currentImage } = forceOnline() ? {images: demoImages, currentImage: demoCurrentImage}: this.props; 
+		if (isComparing) { images = compareList }
     const multipleImages = images.length > 1;
     const dark = this.props.id === "fullscreen-flipper";
+    if (currentImage) {
+		  const index = images.indexOf(currentImage); 
+			if (index != prevI || checkUpdate()) {
+				setPrevI(index); 
+				this.setState({
+					disablePrev: index === 0, 
+					disableNext: index === images.length - 1
+				})
+			}
+		}
     return <div className={`image-flipper ${this.props.id}`} id={this.props.id}
       onKeyDown={e => {
         if (["ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -95,23 +125,24 @@ export class ImageFlipper extends
           hover={this.props.hover}
           onImageLoad={this.onImageLoad}
           dark={dark}
-          image={currentImage} />
+          image={currentImage} 
+					rotation={this.props.rotation}/>
         : <PlaceholderImg textOverlay={Content.NO_IMAGES_YET}
           dark={dark} />}
       {multipleImages && !this.state.disablePrev &&
         <button
-          onClick={this.go(1)}
+          onClick={this.go(-1)}
           autoFocus={true}
           title={t("previous image")}
-          className="image-flipper-left fb-button">
-          <i className={"fa fa-chevron-left"} />
+          className="image-flipper-right fb-button">
+          <i className={"fa fa-chevron-right"} />
         </button>}
       {multipleImages && !this.state.disableNext &&
         <button
-          onClick={this.go(-1)}
+          onClick={this.go(1)}
           title={t("next image")}
-          className="image-flipper-right fb-button">
-          <i className={"fa fa-chevron-right"} />
+          className="image-flipper-left fb-button">
+          <i className={"fa fa-chevron-left"} />
         </button>}
     </div>;
   }

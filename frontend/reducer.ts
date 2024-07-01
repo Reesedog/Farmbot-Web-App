@@ -25,6 +25,7 @@ export interface AppState {
   sequencesPanelState: SequencesPanelState;
   metricPanelState: MetricPanelState;
   toasts: ToastMessages;
+  ads: ToastMessages;
   movement: MovementState,
   jobs: JobsAndLogsState;
   controls: ControlsState;
@@ -84,6 +85,7 @@ export const emptyState = (): AppState => {
       history: false,
     },
     toasts: {},
+    ads: {},
     controls: {
       move: true,
       peripherals: false,
@@ -101,6 +103,7 @@ export const emptyState = (): AppState => {
       controls: false,
       jobs: false,
       connectivity: false,
+      feedback: false,
     },
     hotkeyGuide: false,
   };
@@ -208,6 +211,10 @@ export const appReducer =
       s.toasts = { ...s.toasts, [payload.id]: payload };
       return s;
     })
+    .add<ToastMessageProps>(Actions.CREATE_AD, (s, { payload }) => {
+      s.ads = { ...s.ads, [payload.id]: payload };
+      return s;
+    })
     .add<MovementState>(Actions.START_MOVEMENT, (s, { payload }) => {
       s.movement = payload;
       return s;
@@ -218,5 +225,13 @@ export const appReducer =
         .filter(toast => !toast.id.startsWith(payload))
         .map(toast => { newToastLookup[toast.id] = toast; });
       s.toasts = newToastLookup;
+      return s;
+    })
+    .add<string>(Actions.REMOVE_AD, (s, { payload }) => {
+      const newToastLookup: ToastMessages = {};
+      Object.values(s.ads)
+        .filter(toast => !toast.id.startsWith(payload))
+        .map(ad => { newToastLookup[ad.id] = ad; });
+      s.ads = newToastLookup;
       return s;
     });

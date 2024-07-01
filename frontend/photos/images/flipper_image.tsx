@@ -80,7 +80,8 @@ export class FlipperImage
         cropImage={this.props.crop
           && !!getConfigValue(BooleanSetting.crop_images)}
         cameraCalibrationData={cameraCalibrationData}
-        mapTransformProps={mapTransformProps} />
+        mapTransformProps={mapTransformProps} 
+				ratation={this.props.rotation}/>
       <this.Target
         imageLocation={this.props.image.body.meta}
         target={this.props.target}

@@ -10,7 +10,7 @@ import { TermsCheckbox } from "../front_page/terms_checkbox";
 import { t } from "../i18next_wrapper";
 import { ExternalUrl } from "../external_urls";
 import { DEFAULT_APP_PAGE } from "../front_page/front_page";
-import { ToastContainer } from "../toast/fb_toast";
+import { AdContainer, ToastContainer } from "../toast/fb_toast";
 
 interface State {
   email: string;
@@ -123,6 +123,7 @@ export class TosUpdate extends React.Component<{}, Partial<State>> {
         </Widget>
       </div>
       <ToastContainer />
+      <AdContainer/>
     </div>;
   }
 }

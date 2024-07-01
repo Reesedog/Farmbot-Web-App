@@ -108,4 +108,5 @@ export interface PopupsState {
   controls: boolean;
   jobs: boolean;
   connectivity: boolean;
+  feedback: boolean;
 }

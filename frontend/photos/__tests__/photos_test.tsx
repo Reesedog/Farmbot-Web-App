@@ -29,6 +29,33 @@ import { fakeMovementState } from "../../__test_support__/fake_bot_data";
 import { fakePhotosPanelState } from "../../__test_support__/fake_camera_data";
 import { Actions } from "../../constants";
 
+import { success } from "../../toast/toast"; 
+import { demoImages, demoTakePhoto } from "../../demo/demo_support_framework/supports";
+
+describe('demoTakePhoto', () => {
+  it('adds a photo to demoImages', () => {
+    // Set initial state
+    const initialLength = demoImages.length;
+
+    // Mock demoPresentPhotos and demoImages
+    const demoPresentPhotos = [
+      { body: { created_at: "initialDate" } },
+    ];
+
+    require("../../demo/demo_support_framework/supports").demoPresentPhotos = demoPresentPhotos;
+    require("../../demo/demo_support_framework/supports").demoImages = [...demoImages];
+
+    // Execute the function
+    demoTakePhoto();
+
+    // Verify if the length of demoImages has increased by 1
+    expect(demoImages.length).toBe(initialLength + 1);
+
+    // Verify if the success message was called
+    expect(success).toHaveBeenCalledWith("Photo Taken");
+  });
+});
+
 describe("<DesignerPhotos />", () => {
   const fakeProps = (): DesignerPhotosProps => ({
     dispatch: jest.fn(),

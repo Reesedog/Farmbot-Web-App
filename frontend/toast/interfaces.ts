@@ -13,6 +13,9 @@ interface CreateToastProps {
   idPrefix?: string;
   noTimer?: boolean;
   noDismiss?: boolean;
+  // add a add for link navigation / image source
+  isAd?: boolean;
+  url?: string;
 }
 
 export interface CreateToastOnceProps extends CreateToastProps {

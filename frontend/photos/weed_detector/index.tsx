@@ -1,7 +1,7 @@
 import React from "react";
 import { WeedDetectorState, WeedDetectorProps } from "./interfaces";
 import { Row, Col } from "../../ui";
-import { scanImage, detectPlants } from "./actions";
+import { scanImage, detectPlants, clearWeed} from "./actions";
 import { deletePoints } from "../../api/delete_points";
 import { Progress } from "../../util";
 import { ImageWorkspace, NumericKeyName } from "../image_workspace";
@@ -83,14 +83,15 @@ export class WeedDetector
             className={`fb-button green ${camDisabled.class}`}
             title={camDisabled.title}
             onClick={camDisabled.click ||
-              detectPlants(wDEnvGet("CAMERA_CALIBRATION_coord_scale"))}>
+              detectPlants(wDEnvGet("CAMERA_CALIBRATION_coord_scale"))}
+            >
             {t("detect weeds")}
           </button>
         </MustBeOnline>
         <button
           title={t("clear weeds")}
-          onClick={this.clearWeeds}
-          className="fb-button red">
+          onClick={() => clearWeed()}
+          className="fb-button test red">
           {this.state.deletionProgress || t("CLEAR WEEDS")}
         </button>
       </div>
